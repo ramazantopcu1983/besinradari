@@ -8,15 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0d5c3a;    /* Logonuzdaki koyu yeşil */
-            --secondary-color: #1b4d3e;  /* Koyu çam yeşili (Etiketler için) */
-            --light-green: #e8f5e9;     /* Yumuşak yeşil arka plan */
-            --bg-color: #f4f7f6;        /* Genel sayfa zemin rengi */
+            --primary-color: #1b6b44;
+            --primary-gradient: linear-gradient(135deg, #48b871, #1d6a45);
+            
+            /* Seçilmemiş durum için koyu yeşil ton */
+            --chip-unselected-bg: #1b6b44;
+            --chip-unselected-border: #1b6b44;
+            
+            /* Seçili durum için turuncu ton */
+            --chip-selected-bg: #f39c12;
+            --chip-selected-border: #e67e22;
+
+            --bg-color: #edf5f0;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             
-            /* Durum Renkleri */
             --status-uygun: #27ae60;
             --status-dikkat: #f39c12;
             --status-onerilmez: #e74c3c;
@@ -37,159 +44,151 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-bottom: 30px;
+            padding: 20px 15px 30px;
         }
 
-        /* BANNER / HEADER (Özgün Logo Tasarımıyla Uyumlu) */
-        header {
+        main {
             width: 100%;
-            background: linear-gradient(135deg, #0d5c3a, #166d48);
-            padding: 25px 15px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-        }
-
-        .logo-container {
+            max-width: 420px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 16px;
+        }
+
+        /* LOGO KARTI ALANI */
+        .logo-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            border-radius: 20px;
+            padding: 25px 20px;
+            display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 5px;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
 
         .logo-img {
-            width: 70px;
-            height: 70px;
-            background-color: white;
-            border-radius: 16px;
-            padding: 4px;
-            object-fit: contain;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        header p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        /* KAPSAYICI CONTAINER */
-        main {
+            max-width: 260px;
             width: 100%;
-            max-width: 480px;
-            padding: 20px 15px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* AÇIKLAMA METNİ */
+        .sub-description {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            font-weight: 500;
+            padding: 0 15px;
+        }
+
+        /* BUTONLAR & EYLEM ALANI */
+        .action-section {
+            width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* SEÇİM KARTI (İKİNCİ GÖRSELDEKİ ÖZGÜN TASARIM) */
+        .btn-scan {
+            background: linear-gradient(135deg, #53bd79, #1a6541);
+            color: white;
+            border: none;
+            width: 80%;
+            padding: 14px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(27, 107, 68, 0.25);
+            transition: transform 0.1s ease;
+        }
+
+        .btn-scan:active {
+            transform: scale(0.97);
+        }
+
+        .btn-gallery {
+            background: transparent;
+            border: none;
+            color: #1b6b44;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* SAĞLIK PROFİLLERİ & ALERJEN KARTI */
         .card {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 22px 18px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
         }
 
         .card-title {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 6px;
+            color: #1b6b44;
+            margin-bottom: 4px;
         }
 
         .card-subtitle {
             font-size: 0.82rem;
-            color: var(--text-muted);
+            color: #7f8c8d;
             margin-bottom: 16px;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .section-label {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: var(--primary-color);
-            margin-top: 16px;
+            color: #7f8c8d;
+            margin-top: 18px;
             margin-bottom: 10px;
         }
 
-        /* PROFİL HAPLARI (CHIPS) */
+        /* ÇİPLER (CHIPS) */
         .chips-container {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
 
+        /* Seçili Durum: Turuncu */
         .profile-chip {
-            background-color: #1b4d3e; /* Dolu seçili stil için koyu yeşil */
-            border: 1.5px solid #1b4d3e;
-            border-radius: 25px;
-            padding: 8px 16px;
-            font-size: 0.82rem;
-            font-weight: 500;
+            background-color: var(--chip-selected-bg);
+            border: 1.5px solid var(--chip-selected-border);
+            border-radius: 20px;
+            padding: 7px 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
             color: white;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
+            display: inline-flex;
+            align-items: center;
         }
 
         .profile-chip input {
             display: none;
         }
 
-        /* Seçilmemiş / Pasif Durum (İkinci görseldeki yumuşak tonlar) */
+        /* Seçilmemiş Durum: Koyu Yeşil */
         .profile-chip.unselected {
-            background-color: #f1f8f5;
-            color: #1b4d3e;
-            border-color: #d1e7dd;
-        }
-
-        .profile-chip:active {
-            transform: scale(0.96);
-        }
-
-        /* ÜRÜN OKUT BUTONU & KAMERA */
-        .scan-section {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn-scan {
-            background: linear-gradient(135deg, #0d5c3a, #27ae60);
+            background-color: var(--chip-unselected-bg);
             color: white;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(13, 92, 58, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: transform 0.1s ease;
+            border-color: var(--chip-unselected-border);
+            font-weight: 500;
         }
 
-        .btn-scan:active {
-            transform: scale(0.98);
-        }
-
-        /* KAMERA VİDEO ALANI */
+        /* VİDEO VE KAMERA ALANI */
         .camera-container {
             display: none;
             width: 100%;
@@ -197,40 +196,27 @@
             overflow: hidden;
             position: relative;
             background-color: #000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         video {
             width: 100%;
-            height: 300px;
+            height: 260px;
             object-fit: cover;
-        }
-
-        .scan-overlay {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-            right: 10%;
-            bottom: 10%;
-            border: 2px dashed rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            pointer-events: none;
         }
 
         .btn-capture {
             position: absolute;
-            bottom: 14px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background-color: white;
             color: var(--primary-color);
             border: none;
-            padding: 10px 22px;
+            padding: 8px 18px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         /* SONUÇ KARTI */
@@ -239,6 +225,7 @@
             border-radius: 16px;
             padding: 18px;
             background: white;
+            width: 100%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             border-left: 6px solid var(--text-muted);
         }
@@ -255,8 +242,7 @@
             border-radius: 20px;
             color: white;
             font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
+            font-size: 0.85rem;
         }
 
         .bg-uygun { background-color: var(--status-uygun); }
@@ -267,151 +253,107 @@
         .border-dikkat { border-left-color: var(--status-dikkat) !important; }
         .border-onerilmez { border-left-color: var(--status-onerilmez) !important; }
 
-        .result-details {
-            font-size: 0.88rem;
-            line-height: 1.5;
-            color: #4a5568;
-        }
-
-        .result-details ul {
-            margin-top: 8px;
-            padding-left: 18px;
-        }
-
-        .result-details li {
-            margin-bottom: 4px;
-        }
-
         .loading-spinner {
             display: none;
             text-align: center;
-            padding: 15px;
-            font-size: 0.9rem;
+            padding: 10px;
+            font-size: 0.85rem;
             color: var(--primary-color);
-            font-weight: 500;
+        }
+
+        footer {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <!-- BANNER KISMI (Logo Entegre Edildi) -->
-    <header>
-        <div class="logo-container">
-            <img src="logo.jpg" alt="BesinRadarı Logo" class="logo-img">
-            <h1>BesinRadarı</h1>
-        </div>
-        <p>Akıllı Gıda Etiketi & Sağlık Asistanı</p>
-    </header>
-
     <main>
-        <!-- SAĞLIK PROFİLLERİ SEÇİM ALANI (İkinci görseldeki tasarıma tam uyumlu) -->
+        <!-- LOGO KARTI -->
+        <div class="logo-card">
+            <img src="logo.png" alt="BesinRadarı Logo" class="logo-img">
+        </div>
+
+        <!-- AÇIKLAMA -->
+        <p class="sub-description">
+            Paketli gıda etiketini okut, seçtiğin sağlık profiline göre Uygun / Dikkat / Önerilmez sonucunu gör.
+        </p>
+
+        <!-- EYLEM BUTONLARI -->
+        <div class="action-section">
+            <button class="btn-scan" onclick="openCamera()">Ürün Okut</button>
+            <button class="btn-gallery" onclick="document.getElementById('fileInput').click()">Galeriden etiket seç</button>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="analyzeLabel()">
+            
+            <div class="camera-container" id="cameraContainer">
+                <video id="webcam" autoplay playsinline></video>
+                <button class="btn-capture" onclick="analyzeLabel()">Etiketi Tara ve Analiz Et</button>
+            </div>
+
+            <div class="loading-spinner" id="loadingState">
+                🔍 Etiket taranıyor ve analiz ediliyor...
+            </div>
+        </div>
+
+        <!-- ANALİZ SONUCU -->
+        <section class="result-card" id="resultCard">
+            <div class="result-header">
+                <strong>Analiz Sonucu</strong>
+                <span class="status-badge" id="statusBadge">UYGUN</span>
+            </div>
+            <div class="result-details" id="resultDetails"></div>
+        </section>
+
+        <!-- SAĞLIK PROFİLLERİ KARTI -->
         <section class="card">
             <div class="card-title">Sağlık profillerin</div>
             <div class="card-subtitle">Sonuç yalnızca seçtiğin profiller için üretilir. Seçim cihazında saklanır.</div>
             
             <div class="chips-container" id="profileGrid">
-                <label class="profile-chip">
-                    <input type="checkbox" value="diyabet" checked> Diyabet
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="kalp" checked> Kalp-damar
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="tansiyon" checked> Yüksek tansiyon
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="obezite" checked> Obezite / kilo kontrolü
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="cocuk" checked> Çocuk
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="bebek" checked> Bebek (12 ay altı)
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="gebelik" checked> Gebelik
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="alerji" checked> Alerji
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="pku" checked> Fenilketonüri
-                </label>
+                <label class="profile-chip unselected"><input type="checkbox" value="diyabet"> Diyabet</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="kalp"> Kalp-damar</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="tansiyon"> Yüksek tansiyon</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="obezite"> Obezite / kilo kontrolü</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="cocuk"> Çocuk</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="bebek"> Bebek (12 ay altı)</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="gebelik"> Gebelik</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="alerji"> Alerji</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="pku"> Fenilketonüri</label>
             </div>
 
             <div class="section-label">Alerjenlerin</div>
             <div class="chips-container" id="allergenGrid">
-                <label class="profile-chip">
-                    <input type="checkbox" value="gluten" checked> Gluten
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="sut" checked> Süt
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="soya" checked> Soya
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="findik" checked> Fındık
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="yerfistigi" checked> Yer fıstığı
-                </label>
-                <label class="profile-chip">
-                    <input type="checkbox" value="susam" checked> Susam
-                </label>
-                <label class="profile-chip unselected">
-                    <input type="checkbox" value="yumurta"> Yumurta
-                </label>
-                <label class="profile-chip unselected">
-                    <input type="checkbox" value="balik"> Balık
-                </label>
-                <label class="profile-chip unselected">
-                    <input type="checkbox" value="ceviz"> Ceviz / badem
-                </label>
+                <label class="profile-chip unselected"><input type="checkbox" value="gluten"> Gluten</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="sut"> Süt</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="soya"> Soya</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="findik"> Fındık</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="yerfistigi"> Yer fıstığı</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="susam"> Susam</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="yumurta"> Yumurta</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="balik"> Balık</label>
+                <label class="profile-chip unselected"><input type="checkbox" value="ceviz"> Ceviz / badem</label>
             </div>
         </section>
 
-        <!-- TARAMA ALANI -->
-        <section class="scan-section">
-            <button class="btn-scan" onclick="openCamera()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                Ürün Okut
-            </button>
-
-            <!-- CANLI KAMERA GÖRÜNTÜSÜ -->
-            <div class="camera-container" id="cameraContainer">
-                <video id="webcam" autoplay playsinline></video>
-                <div class="scan-overlay"></div>
-                <button class="btn-capture" onclick="analyzeLabel()">Etiketi Tara ve Analiz Et</button>
-            </div>
-
-            <!-- ANALİZ YÜKLENİYOR BİLGİSİ -->
-            <div class="loading-spinner" id="loadingState">
-                🔍 Etiket taranıyor; E-kodları, şeker, yağ ve tuz oranları analiz ediliyor...
-            </div>
-        </section>
-
-        <!-- ANALİZ SONUCU -->
-        <section class="result-card" id="resultCard">
-            <div class="result-header">
-                <strong style="font-size: 1.05rem;">Analiz Sonucu</strong>
-                <span class="status-badge" id="statusBadge">UYGUN</span>
-            </div>
-            <div class="result-details" id="resultDetails"></div>
-        </section>
+        <footer>
+            Bilgilendirme amaçlıdır, tıbbi tavsiye yerine geçmez.
+        </footer>
     </main>
 
     <script>
-        // Profil Çip Tıklama Etkileşimleri
+        // Çip tıklama davranışları
         document.querySelectorAll('.profile-chip').forEach(chip => {
             const checkbox = chip.querySelector('input');
             
-            // Başlangıç durumunu ayarla
             if (!checkbox.checked) {
                 chip.classList.add('unselected');
             }
 
-            chip.addEventListener('click', () => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
                 checkbox.checked = !checkbox.checked;
                 if (checkbox.checked) {
                     chip.classList.remove('unselected');
@@ -421,7 +363,7 @@
             });
         });
 
-        // Kamera Erişimi
+        // Kamera Açma
         let videoStream = null;
         async function openCamera() {
             const container = document.getElementById('cameraContainer');
@@ -435,11 +377,11 @@
                 video.srcObject = videoStream;
                 container.style.display = 'block';
             } catch (err) {
-                alert("Kameraya erişim sağlanamadı. Lütfen kamera izinlerinizi kontrol edin.");
+                alert("Kameraya erişim sağlanamadı.");
             }
         }
 
-        // Yapay Zekâ Etiket Okuma & Kural Motoru Simülasyonu
+        // Analiz Simülasyonu
         function analyzeLabel() {
             const loading = document.getElementById('loadingState');
             const resultCard = document.getElementById('resultCard');
@@ -458,41 +400,26 @@
 
                 const selectedProfiles = Array.from(document.querySelectorAll('.chips-container input:checked')).map(i => i.value);
 
+                if (selectedProfiles.length === 0) {
+                    resultCard.className = "result-card border-uygun";
+                    badge.className = "status-badge bg-uygun";
+                    badge.innerText = "BİLGİ";
+                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Analiz yapabilmek için lütfen en az bir sağlık profili veya alerjen seçin.</p>";
+                    return;
+                }
+
                 if (selectedProfiles.includes('diyabet') || selectedProfiles.includes('obezite')) {
                     resultCard.className = "result-card border-onerilmez";
                     badge.className = "status-badge bg-onerilmez";
                     badge.innerText = "ÖNERİLMEZ";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Uyarısı:</strong>
-                        <ul>
-                            <li><b>Yüksek Şeker Oranı:</b> Ürün 100g'da 24.5g serbest şeker içermektedir (WHO eşik sınırı > 22.5g).</li>
-                            <li><b>Riskli Katkı Maddesi:</b> Glikoz-Fruktoz şurubu ve E102 (Tartrazin) tespit edildi.</li>
-                            <li>Seçtiğiniz diyabet ve kilo kontrolü profiline uygun değildir.</li>
-                        </ul>
-                    `;
-                } else if (selectedProfiles.includes('tansiyon') || selectedProfiles.includes('kalp')) {
-                    resultCard.className = "result-card border-dikkat";
-                    badge.className = "status-badge bg-dikkat";
-                    badge.innerText = "DİKKAT";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Uyarısı:</strong>
-                        <ul>
-                            <li><b>Orta Düzey Sodyum/Tuz:</b> Ürün 100g'da 1.2g tuz içermektedir (0.3g - 1.5g dikkat aralığı).</li>
-                            <li>Sodyum içeren bileşenler tansiyon hastaları için dikkatli tüketilmelidir.</li>
-                        </ul>
-                    `;
+                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Glikoz-fruktoz şurubu ve yüksek şeker oranı tespit edilmiştir.</p>";
                 } else {
                     resultCard.className = "result-card border-uygun";
                     badge.className = "status-badge bg-uygun";
                     badge.innerText = "UYGUN";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Değerlendirmesi:</strong>
-                        <ul>
-                            <li>Seçtiğiniz aktif profiller için Türk Gıda Kodeksi ve WHO standartlarına aykırı kritik bir risk veya yüksek eşik aşımı tespit edilmemiştir.</li>
-                        </ul>
-                    `;
+                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Seçilen profiller için riskli bir bileşen bulunamadı.</p>";
                 }
-            }, 1800);
+            }, 1200);
         }
     </script>
 </body>
