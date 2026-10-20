@@ -44,7 +44,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px 15px 30px;
+            padding: 12px 15px 20px;
         }
 
         main {
@@ -53,23 +53,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 10px;
         }
 
-        /* LOGO KARTI ALANI */
+        /* LOGO KARTI ALANI (Boşluklar azaltıldı) */
         .logo-card {
             background-color: var(--card-bg);
             width: 100%;
-            border-radius: 20px;
-            padding: 25px 20px;
+            border-radius: 16px;
+            padding: 12px 15px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
 
         .logo-img {
-            max-width: 260px;
+            max-width: 180px;
             width: 100%;
             height: auto;
             object-fit: contain;
@@ -79,10 +79,10 @@
         .sub-description {
             text-align: center;
             color: #6c757d;
-            font-size: 0.75rem;
-            line-height: 1.3;
+            font-size: 0.73rem;
+            line-height: 1.25;
             font-weight: 500;
-            padding: 0 15px;
+            padding: 0 10px;
         }
 
         /* BUTONLAR & EYLEM ALANI */
@@ -91,7 +91,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .btn-scan {
@@ -99,12 +99,12 @@
             color: white;
             border: none;
             width: 80%;
-            padding: 14px;
-            font-size: 1.15rem;
+            padding: 12px;
+            font-size: 1.05rem;
             font-weight: 700;
             border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 6px 16px rgba(27, 107, 68, 0.25);
+            box-shadow: 0 4px 12px rgba(27, 107, 68, 0.25);
             transition: transform 0.1s ease;
         }
 
@@ -116,57 +116,57 @@
             background: transparent;
             border: none;
             color: #1b6b44;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 2px 6px;
         }
 
         /* SAĞLIK PROFİLLERİ & ALERJEN KARTI */
         .card {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 22px 18px;
+            border-radius: 20px;
+            padding: 16px 14px;
             width: 100%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
         }
 
         .card-title {
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             font-weight: 700;
             color: #1b6b44;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .card-subtitle {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             color: #7f8c8d;
-            margin-bottom: 16px;
-            line-height: 1.35;
+            margin-bottom: 12px;
+            line-height: 1.3;
         }
 
         .section-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #7f8c8d;
-            margin-top: 18px;
-            margin-bottom: 10px;
+            margin-top: 12px;
+            margin-bottom: 8px;
         }
 
         /* ÇİPLER (CHIPS) */
         .chips-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         /* Seçili Durum: Turuncu */
         .profile-chip {
             background-color: var(--chip-selected-bg);
             border: 1.5px solid var(--chip-selected-border);
-            border-radius: 20px;
-            padding: 7px 15px;
-            font-size: 0.8rem;
+            border-radius: 18px;
+            padding: 5px 12px;
+            font-size: 0.76rem;
             font-weight: 600;
             color: white;
             cursor: pointer;
@@ -192,7 +192,7 @@
         .camera-container {
             display: none;
             width: 100%;
-            border-radius: 16px;
+            border-radius: 14px;
             overflow: hidden;
             position: relative;
             background-color: #000;
@@ -200,49 +200,49 @@
 
         video {
             width: 100%;
-            height: 260px;
+            height: 220px;
             object-fit: cover;
         }
 
         .btn-capture {
             position: absolute;
-            bottom: 12px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             background-color: white;
             color: var(--primary-color);
             border: none;
-            padding: 8px 18px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
         }
 
         /* SONUÇ KARTI */
         .result-card {
             display: none;
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 14px;
+            padding: 14px;
             background: white;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border-left: 6px solid var(--text-muted);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--text-muted);
         }
 
         .result-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .status-badge {
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 20px;
             color: white;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
         }
 
         .bg-uygun { background-color: var(--status-uygun); }
@@ -256,14 +256,14 @@
         .loading-spinner {
             display: none;
             text-align: center;
-            padding: 10px;
-            font-size: 0.85rem;
+            padding: 8px;
+            font-size: 0.8rem;
             color: var(--primary-color);
         }
 
         footer {
-            margin-top: 15px;
-            font-size: 0.75rem;
+            margin-top: 10px;
+            font-size: 0.7rem;
             color: #7f8c8d;
             text-align: center;
         }
@@ -404,7 +404,7 @@
                     resultCard.className = "result-card border-uygun";
                     badge.className = "status-badge bg-uygun";
                     badge.innerText = "BİLGİ";
-                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Analiz yapabilmek için lütfen en az bir sağlık profili veya alerjen seçin.</p>";
+                    details.innerHTML = "<p style='font-size:0.8rem; color:#4a5568;'>Analiz yapabilmek için lütfen en az bir sağlık profili veya alerjen seçin.</p>";
                     return;
                 }
 
@@ -412,12 +412,12 @@
                     resultCard.className = "result-card border-onerilmez";
                     badge.className = "status-badge bg-onerilmez";
                     badge.innerText = "ÖNERİLMEZ";
-                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Glikoz-fruktoz şurubu ve yüksek şeker oranı tespit edilmiştir.</p>";
+                    details.innerHTML = "<p style='font-size:0.8rem; color:#4a5568;'>Glikoz-fruktoz şurubu ve yüksek şeker oranı tespit edilmiştir.</p>";
                 } else {
                     resultCard.className = "result-card border-uygun";
                     badge.className = "status-badge bg-uygun";
                     badge.innerText = "UYGUN";
-                    details.innerHTML = "<p style='font-size:0.85rem; color:#4a5568;'>Seçilen profiller için riskli bir bileşen bulunamadı.</p>";
+                    details.innerHTML = "<p style='font-size:0.8rem; color:#4a5568;'>Seçilen profiller için riskli bir bileşen bulunamadı.</p>";
                 }
             }, 1200);
         }
