@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0d5c3a;    /* Koyu Yeşili */
-            --secondary-color: #27ae60;  /* Doğa Yeşili */
-            --light-green: #e8f5e9;     /* Yumuşak Yeşil Zemin */
-            --bg-color: #f4f7f6;        /* Genel Sayfa Zemini */
+            --primary-color: #0d5c3a;    /* Logonuzdaki koyu yeşil */
+            --secondary-color: #27ae60;  /* Canlı doğa yeşili */
+            --light-green: #e8f5e9;     /* Yumuşak yeşil arka plan */
+            --bg-color: #f4f7f6;        /* Genel sayfa zemin rengi */
             --card-bg: #ffffff;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
@@ -60,15 +60,13 @@
             margin-bottom: 6px;
         }
 
-        .logo-icon {
-            width: 42px;
-            height: 42px;
+        .logo-img {
+            width: 45px;
+            height: 45px;
             background-color: white;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            padding: 3px;
+            object-fit: contain;
         }
 
         header h1 {
@@ -102,7 +100,7 @@
         }
 
         .card-title {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--primary-color);
             margin-bottom: 12px;
@@ -130,7 +128,6 @@
             align-items: center;
             gap: 6px;
             transition: all 0.2s ease;
-            user-select: none;
         }
 
         .profile-chip input {
@@ -241,7 +238,7 @@
             border-radius: 20px;
             color: white;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
         }
 
@@ -268,6 +265,7 @@
             margin-bottom: 4px;
         }
 
+        /* SİMÜLE EDİLMİŞ LOG HIZLARI (YAPAY ZEKA ANALİZİ) */
         .loading-spinner {
             display: none;
             text-align: center;
@@ -283,13 +281,8 @@
     <!-- BANNER KISMI -->
     <header>
         <div class="logo-container">
-            <div class="logo-icon">
-                <!-- Yaprak ve Radar Simgesi -->
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d5c3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.12 2 9a7 7 0 0 1-10 9z"></path>
-                    <path d="M12 2a10 10 0 0 1 10 10"></path>
-                </svg>
-            </div>
+            <!-- Üretilen Logo Görseli -->
+            <img src="watermarked_img_4903884374820274045.jpg" alt="BesinRadarı Logo" class="logo-img">
             <h1>BesinRadarı</h1>
         </div>
         <p>Akıllı Gıda Etiketi & Sağlık Asistanı</p>
@@ -390,7 +383,7 @@
                 video.srcObject = videoStream;
                 container.style.display = 'block';
             } catch (err) {
-                alert("Kameraya erişim sağlanamadı. Lütfen kamera izinlerinizi kontrol edin veya güvenli bir bağlantı (HTTPS/local) üzerinden çalıştırın.");
+                alert("Kameraya erişim sağlanamadı. Lütfen kamera izinlerinizi kontrol edin.");
             }
         }
 
@@ -425,7 +418,7 @@
                     details.innerHTML = `
                         <strong>Gerekçeli Sağlık Uyarısı:</strong>
                         <ul>
-                            <li><b>Yüksek Şeker Oranı:</b> Ürün 100g'da 24.5g şeker içermektedir (Eşik değer > 22.5g).</li>
+                            <li><b>Yüksek Şerbet/Şeker Oranı:</b> Ürün 100g'da 24.5g şeker içermektedir (Eşik değer > 22.5g).</li>
                             <li><b>Riskli Katkı Maddesi:</b> E102 (Tartrazin) ve Glikoz-Fruktoz Şurubu tespit edildi.</li>
                             <li>Diyabet ve Obezite/Kilo Kontrolü profili için yüksek glisemik yük oluşturmaktadır.</li>
                         </ul>
