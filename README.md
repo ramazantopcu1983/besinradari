@@ -1,8 +1,8 @@
 # BesinRadarı
 
-Uygulama paketli gıda etiketi fotoğraflarını tarayıcıda Tesseract.js (Türkçe ve İngilizce OCR) ile metne çevirir ve OCR metnini seçilen sağlık profilleri/alerjenlerle birlikte sunucu tarafında Groq API'ye göndererek bilgilendirme amaçlı değerlendirir.
+Uygulama paketli gıda etiketi fotoğraflarını tarayıcıda Tesseract.js (Türkçe ve İngilizce OCR) ile metne çevirir; sıkıştırılmış fotoğrafları ve OCR metnini seçilen sağlık profilleri/alerjenlerle birlikte sunucu tarafında Groq'un görsel anlayabilen modeline göndererek bilgilendirme amaçlı değerlendirir.
 
-Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraflar olarak ekleyin. Kamera ile art arda birden fazla kare alınabilir; galeriden de birden fazla görüntü seçilebilir (en fazla 4). Fotoğraf türünü her görüntü için belirtmek analize yardımcı olur. Tarayıcı fotoğrafın bir kopyasında gri tonlama, kontrast iyileştirme ve boyut normalizasyonu uygulayıp hem özgün hem iyileştirilmiş görüntüyü OCR'dan geçirir; daha yüksek OCR güven puanına sahip metni kullanır.
+Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraflar olarak ekleyin. Kamera ile art arda birden fazla kare alınabilir; galeriden de birden fazla görüntü seçilebilir (en fazla 3; Groq görsel istek sınırı). Fotoğraf türünü her görüntü için belirtmek analize yardımcı olur. Tarayıcı fotoğrafın bir kopyasında gri tonlama, kontrast iyileştirme ve boyut normalizasyonu uygulayıp hem özgün hem iyileştirilmiş görüntüyü OCR'dan geçirir; daha yüksek OCR güven puanına sahip metni kullanır. Görsel analiz için orijinal fotoğraflar ayrıca küçültülüp sıkıştırılır ve Groq'a gönderilir; model görseli OCR metniyle karşılaştırabilir.
 
 ## Çalıştırma
 
@@ -16,11 +16,11 @@ Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraf
   ```
 
 - Tarayıcıda `http://localhost:3000` adresini açın. OCR kitaplığı ve Türkçe/İngilizce dil verileri ilk kullanımda CDN üzerinden indirilir; internet bağlantısı gerekir.
-- İsteğe bağlı olarak `GROQ_MODEL` ve `PORT` ortam değişkenleriyle model/port seçilebilir. Varsayılan model `openai/gpt-oss-20b`, port `3000`'dir.
+- İsteğe bağlı olarak `GROQ_VISION_MODEL` ve `PORT` ortam değişkenleriyle model/port seçilebilir. Varsayılan görsel modeli `qwen/qwen3.8-27b`, port `3000`'dir.
 
 ## Veri ve sınırlamalar
 
-Etiket fotoğrafı OCR için tarayıcıda işlenir; sunucuya OCR metni ve seçilen profiller gönderilir. Sunucu bu bilgileri değerlendirme için Groq API'ye iletir. API anahtarı yalnızca sunucuda kalır.
+OCR tarayıcıda çalışır. En fazla 3 adet küçültülmüş etiket fotoğrafı, OCR metni ve seçilen profiller sunucudan Groq API'ye gönderilir. API anahtarı yalnızca sunucuda kalır.
 
 OCR küçük yazı, parlama, eğri ambalaj veya hareket bulanıklığında yine hata yapabilir. İyi ışıkta parlamayı önleyin, kamerayı etikete paralel tutun, yalnızca tablo ya da içerik listesini kadraja doldurun ve odak kilitlenene kadar bekleyin. Analiz sonucundaki OCR metnini ambalajla karşılaştırın.
 
