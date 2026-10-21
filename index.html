@@ -238,7 +238,7 @@
 
         .photo-item {
             display: grid;
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 1fr auto;
             align-items: center;
             gap: 6px;
             padding: 8px;
@@ -247,7 +247,6 @@
             font-size: 0.72rem;
         }
 
-        .photo-item select,
         .photo-item button {
             font: inherit;
             padding: 5px;
@@ -427,7 +426,7 @@
             OCR ve yapay zekâ değerlendirmesi bilgilendirme amaçlıdır; tıbbi tavsiye yerine geçmez.
             OCR metni ve seçilen profiller analiz için Groq servisine gönderilir.
             Etiketin tamamını kontrol edin ve sağlık kararları için uzmana danışın.
-            <small class="update-date">Son güncelleme: 21.10.2026 11:58 (TSİ)</small>
+            <small class="update-date">Son güncelleme: 21.10.2026 12:07 (TSİ)</small>
         </footer>
     </main>
 
@@ -492,13 +491,6 @@
             return Array.from(container.querySelectorAll('input:checked')).map(input => input.value);
         }
 
-        const photoTypeNames = {
-            auto: 'otomatik tür',
-            nutrition: 'besin tablosu',
-            ingredients: 'içindekiler / alerjen listesi',
-            other: 'diğer etiket bilgisi'
-        };
-
         function renderPhotoList() {
             photoList.replaceChildren();
             pendingPhotos.forEach((photo, index) => {
@@ -507,20 +499,6 @@
 
                 const name = document.createElement('span');
                 name.textContent = photo.name;
-
-                const type = document.createElement('select');
-                type.setAttribute('aria-label', `${photo.name} fotoğraf türü`);
-                for (const [value, label] of Object.entries(photoTypeNames)) {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = label;
-                    type.appendChild(option);
-                }
-                type.value = photo.type;
-                type.disabled = isAnalyzing;
-                type.addEventListener('change', () => {
-                    photo.type = type.value;
-                });
 
                 const remove = document.createElement('button');
                 remove.type = 'button';
@@ -531,7 +509,7 @@
                     renderPhotoList();
                 });
 
-                row.append(name, type, remove);
+                row.append(name, remove);
                 photoList.appendChild(row);
             });
             analyzeButton.disabled = isAnalyzing || pendingPhotos.length === 0;
@@ -553,7 +531,7 @@
             if (image.size > maxPhotoBytes) {
                 throw new Error('Fotoğraf 10 MB sınırını aşıyor. Daha küçük bir görüntü seçin.');
             }
-            pendingPhotos.push({ image, name, type: 'auto' });
+            pendingPhotos.push({ image, name });
             renderPhotoList();
         }
 
@@ -822,7 +800,7 @@
                 }
 
                 const aggregatedOcrText = recognizedPhotos.map(photo =>
-                    `--- FOTOĞRAF ${photo.index} (${photoTypeNames[photo.type]}; OCR güveni %${Math.round(photo.confidence)}) ---\n${photo.text}`
+                    `--- FOTOĞRAF ${photo.index} (otomatik sınıflandır; OCR güveni %${Math.round(photo.confidence)}) ---\n${photo.text}`
                 ).join('\n\n');
                 if (aggregatedOcrText.length > 24000) {
                     throw new Error('Okunan metin çok uzun. Fotoğraf sayısını azaltıp yalnızca tablo ve içindekiler bölümlerini ekleyin.');

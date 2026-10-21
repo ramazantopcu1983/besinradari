@@ -2,7 +2,7 @@
 
 Uygulama paketli gıda etiketi fotoğraflarını tarayıcıda Tesseract.js (Türkçe ve İngilizce OCR) ile metne çevirir; sıkıştırılmış fotoğrafları ve OCR metnini seçilen sağlık profilleri/alerjenlerle birlikte sunucu tarafında Groq'un görsel anlayabilen modeline göndererek bilgilendirme amaçlı değerlendirir.
 
-Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraflar olarak ekleyin. Kamera ile art arda birden fazla kare alınabilir; galeriden de birden fazla görüntü seçilebilir (en fazla 3; Groq görsel istek sınırı). Fotoğraf türünü her görüntü için belirtmek analize yardımcı olur. Tarayıcı fotoğrafın bir kopyasında gri tonlama, kontrast iyileştirme ve boyut normalizasyonu uygulayıp hem özgün hem iyileştirilmiş görüntüyü OCR'dan geçirir; daha yüksek OCR güven puanına sahip metni kullanır. Görsel analiz için orijinal fotoğraflar ayrıca küçültülüp sıkıştırılır ve Groq'a gönderilir; model görseli OCR metniyle karşılaştırabilir.
+Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraflar olarak ekleyin. Kamera ile art arda birden fazla kare alınabilir; galeriden de birden fazla görüntü seçilebilir (en fazla 3; Groq görsel istek sınırı). Fotoğrafların türü model tarafından görüntü ve OCR metninden otomatik sınıflandırılır. Tarayıcı fotoğrafın bir kopyasında gri tonlama, kontrast iyileştirme ve boyut normalizasyonu uygulayıp hem özgün hem iyileştirilmiş görüntüyü OCR'dan geçirir; daha yüksek OCR güven puanına sahip metni kullanır. Görsel analiz için orijinal fotoğraflar ayrıca küçültülüp sıkıştırılır ve Groq'a gönderilir; model görseli OCR metniyle karşılaştırabilir.
 
 ## Çalıştırma
 
