@@ -1,6 +1,8 @@
 # BesinRadarı
 
-Uygulama paketli gıda etiketi fotoğrafını tarayıcıda Tesseract.js (Türkçe OCR) ile metne çevirir ve metni seçilen sağlık profilleri/alerjenlerle birlikte sunucu tarafında Groq API'ye göndererek bilgilendirme amaçlı değerlendirir.
+Uygulama paketli gıda etiketi fotoğraflarını tarayıcıda Tesseract.js (Türkçe ve İngilizce OCR) ile metne çevirir ve OCR metnini seçilen sağlık profilleri/alerjenlerle birlikte sunucu tarafında Groq API'ye göndererek bilgilendirme amaçlı değerlendirir.
+
+Besin tablosunu ve içindekiler/alerjen listesini ayrı, yakın çekim fotoğraflar olarak ekleyin. Kamera ile art arda birden fazla kare alınabilir; galeriden de birden fazla görüntü seçilebilir (en fazla 4). Fotoğraf türünü her görüntü için belirtmek analize yardımcı olur. Tarayıcı fotoğrafın bir kopyasında gri tonlama, kontrast iyileştirme ve boyut normalizasyonu uygulayıp hem özgün hem iyileştirilmiş görüntüyü OCR'dan geçirir; daha yüksek OCR güven puanına sahip metni kullanır.
 
 ## Çalıştırma
 
@@ -13,11 +15,13 @@ Uygulama paketli gıda etiketi fotoğrafını tarayıcıda Tesseract.js (Türkç
   npm start
   ```
 
-- Tarayıcıda `http://localhost:3000` adresini açın. OCR kitaplığı ve Türkçe dil verisi ilk kullanımda CDN üzerinden indirilir; internet bağlantısı gerekir.
-- İsteğe bağlı olarak `GROQ_MODEL` ve `PORT` ortam değişkenleriyle model/port seçilebilir. Varsayılan model `llama-3.3-70b-versatile`, port `3000`'dir.
+- Tarayıcıda `http://localhost:3000` adresini açın. OCR kitaplığı ve Türkçe/İngilizce dil verileri ilk kullanımda CDN üzerinden indirilir; internet bağlantısı gerekir.
+- İsteğe bağlı olarak `GROQ_MODEL` ve `PORT` ortam değişkenleriyle model/port seçilebilir. Varsayılan model `openai/gpt-oss-20b`, port `3000`'dir.
 
 ## Veri ve sınırlamalar
 
 Etiket fotoğrafı OCR için tarayıcıda işlenir; sunucuya OCR metni ve seçilen profiller gönderilir. Sunucu bu bilgileri değerlendirme için Groq API'ye iletir. API anahtarı yalnızca sunucuda kalır.
+
+OCR küçük yazı, parlama, eğri ambalaj veya hareket bulanıklığında yine hata yapabilir. İyi ışıkta parlamayı önleyin, kamerayı etikete paralel tutun, yalnızca tablo ya da içerik listesini kadraja doldurun ve odak kilitlenene kadar bekleyin. Analiz sonucundaki OCR metnini ambalajla karşılaştırın.
 
 OCR hatalı okuyabilir, model yanlış veya eksik değerlendirme yapabilir. Belirsiz ya da okunmayan bilgilerde sonuç belirsiz gösterilir; sonuç tıbbi tavsiye, teşhis veya güvenlik garantisi değildir. Alerji ve sağlık kararlarında ürünün fiziksel ambalajını ve uzman görüşünü esas alın.

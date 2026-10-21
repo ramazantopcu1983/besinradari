@@ -200,23 +200,67 @@
 
         video {
             width: 100%;
-            height: 220px;
-            object-fit: cover;
+            max-height: 65vh;
+            object-fit: contain;
         }
 
         .btn-capture {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
             background-color: white;
             color: var(--primary-color);
             border: none;
-            padding: 6px 16px;
+            padding: 10px 16px;
             border-radius: 20px;
             font-weight: 600;
             font-size: 0.8rem;
             cursor: pointer;
+        }
+
+        .camera-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background-color: #000;
+        }
+
+        .scan-guidance {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            line-height: 1.4;
+        }
+
+        .photo-list {
+            width: 100%;
+            display: grid;
+            gap: 6px;
+        }
+
+        .photo-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            background: white;
+            border-radius: 10px;
+            font-size: 0.72rem;
+        }
+
+        .photo-item select,
+        .photo-item button {
+            font: inherit;
+            padding: 5px;
+        }
+
+        .photo-item button:disabled,
+        .action-section button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .btn-analyze-photos {
+            width: 100%;
         }
 
         /* SONUÇ KARTI */
@@ -317,14 +361,23 @@
         <!-- EYLEM BUTONLARI -->
         <div class="action-section">
             <button class="btn-scan" onclick="openCamera()">Ürün Okut</button>
-            <button class="btn-gallery" onclick="document.getElementById('fileInput').click()">Galeriden etiket seç</button>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="analyzeLabel(this.files[0])">
+            <button class="btn-gallery" onclick="document.getElementById('fileInput').click()">Galeriden fotoğraf ekle</button>
+            <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="addGalleryPhotos(this.files)">
+            <p class="scan-guidance">
+                Daha iyi okuma için besin tablosunu ve içindekiler/alerjen listesini ayrı ayrı, yakından, düz ve net çekin.
+                En fazla 4 fotoğraf ekleyebilirsiniz.
+            </p>
             
             <div class="camera-container" id="cameraContainer">
                 <video id="webcam" autoplay playsinline></video>
-                <button class="btn-capture" onclick="captureAndAnalyze()">Etiketi Tara ve Analiz Et</button>
+                <div class="camera-actions">
+                    <button class="btn-capture" onclick="captureAndQueue()">Bu fotoğrafı ekle</button>
+                    <button class="btn-capture" onclick="closeCamera()">Kamerayı kapat</button>
+                </div>
             </div>
 
+            <div class="photo-list" id="photoList" aria-live="polite"></div>
+            <button class="btn-scan btn-analyze-photos" id="analyzeButton" onclick="analyzeLabel()" disabled>Fotoğrafları OCR ile analiz et</button>
             <div class="loading-spinner" id="loadingState">
                 🔍 Etiket taranıyor ve analiz ediliyor...
             </div>
@@ -372,9 +425,9 @@
 
         <footer>
             OCR ve yapay zekâ değerlendirmesi bilgilendirme amaçlıdır; tıbbi tavsiye yerine geçmez.
-            OCR metni ve seçilen profiller analiz için OpenAI servisine gönderilir.
+            OCR metni ve seçilen profiller analiz için Groq servisine gönderilir.
             Etiketin tamamını kontrol edin ve sağlık kararları için uzmana danışın.
-            <small class="update-date">Son güncelleme: 21.10.2026 10:52 (TSİ)</small>
+            <small class="update-date">Son güncelleme: 21.10.2026 11:45 (TSİ)</small>
         </footer>
     </main>
 
@@ -407,22 +460,112 @@
             document.getElementById('resultCard').style.display = 'none';
 
             try {
+                closeCamera();
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" } 
+                    video: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
                 });
                 video.srcObject = videoStream;
                 container.style.display = 'block';
-            } catch (err) {
-                alert("Kameraya erişim sağlanamadı.");
+            } catch (error) {
+                showError(`Kameraya erişilemedi: ${error.message}`);
             }
         }
 
         const profileGrid = document.getElementById('profileGrid');
         const allergenGrid = document.getElementById('allergenGrid');
         const fileInput = document.getElementById('fileInput');
+        const photoList = document.getElementById('photoList');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const cameraButton = document.querySelector('.action-section > .btn-scan');
+        const galleryButton = document.querySelector('.btn-gallery');
+        const maxPhotos = 4;
+        const maxPhotoBytes = 10 * 1024 * 1024;
+        const pendingPhotos = [];
+        let isAnalyzing = false;
 
         function getSelectedValues(container) {
             return Array.from(container.querySelectorAll('input:checked')).map(input => input.value);
+        }
+
+        const photoTypeNames = {
+            auto: 'otomatik tür',
+            nutrition: 'besin tablosu',
+            ingredients: 'içindekiler / alerjen listesi',
+            other: 'diğer etiket bilgisi'
+        };
+
+        function renderPhotoList() {
+            photoList.replaceChildren();
+            pendingPhotos.forEach((photo, index) => {
+                const row = document.createElement('div');
+                row.className = 'photo-item';
+
+                const name = document.createElement('span');
+                name.textContent = photo.name;
+
+                const type = document.createElement('select');
+                type.setAttribute('aria-label', `${photo.name} fotoğraf türü`);
+                for (const [value, label] of Object.entries(photoTypeNames)) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = label;
+                    type.appendChild(option);
+                }
+                type.value = photo.type;
+                type.disabled = isAnalyzing;
+                type.addEventListener('change', () => {
+                    photo.type = type.value;
+                });
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.textContent = 'Kaldır';
+                remove.disabled = isAnalyzing;
+                remove.addEventListener('click', () => {
+                    pendingPhotos.splice(index, 1);
+                    renderPhotoList();
+                });
+
+                row.append(name, type, remove);
+                photoList.appendChild(row);
+            });
+            analyzeButton.disabled = isAnalyzing || pendingPhotos.length === 0;
+            analyzeButton.textContent = pendingPhotos.length
+                ? `Fotoğrafları analiz et (${pendingPhotos.length})`
+                : 'Önce etiket fotoğrafı ekleyin';
+        }
+
+        function addPhoto(image, name) {
+            if (isAnalyzing) {
+                throw new Error('Analiz devam ederken fotoğraf eklenemez.');
+            }
+            if (pendingPhotos.length >= maxPhotos) {
+                throw new Error(`En fazla ${maxPhotos} fotoğraf ekleyebilirsiniz.`);
+            }
+            if (!(image instanceof Blob) || (image.type && !image.type.startsWith('image/'))) {
+                throw new Error('Dosya bir görüntü olarak okunamadı. JPG veya PNG deneyin.');
+            }
+            if (image.size > maxPhotoBytes) {
+                throw new Error('Fotoğraf 10 MB sınırını aşıyor. Daha küçük bir görüntü seçin.');
+            }
+            pendingPhotos.push({ image, name, type: 'auto' });
+            renderPhotoList();
+        }
+
+        function addGalleryPhotos(files) {
+            try {
+                for (const file of files) {
+                    addPhoto(file, file.name || `Fotoğraf ${pendingPhotos.length + 1}`);
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                fileInput.value = '';
+            }
         }
 
         function captureFrame() {
@@ -447,12 +590,138 @@
             });
         }
 
-        async function captureAndAnalyze() {
+        async function captureAndQueue() {
             try {
-                await analyzeLabel(await captureFrame());
+                addPhoto(await captureFrame(), `Kamera fotoğrafı ${pendingPhotos.length + 1}`);
             } catch (error) {
                 showError(error.message);
             }
+        }
+
+        function closeCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            const video = document.getElementById('webcam');
+            video.srcObject = null;
+            document.getElementById('cameraContainer').style.display = 'none';
+        }
+
+        function loadImageBitmap(image) {
+            if (window.createImageBitmap) {
+                return createImageBitmap(image).catch(() => loadImageElement(image));
+            }
+            return loadImageElement(image);
+        }
+
+        function loadImageElement(image) {
+            return new Promise((resolve, reject) => {
+                const imageElement = new Image();
+                const objectUrl = URL.createObjectURL(image);
+                imageElement.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    resolve(imageElement);
+                };
+                imageElement.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error('Fotoğraf açılamadı. JPG veya PNG biçiminde yeniden deneyin.'));
+                };
+                imageElement.src = objectUrl;
+            });
+        }
+
+        async function createEnhancedImage(image) {
+            let bitmap;
+            try {
+                bitmap = await loadImageBitmap(image);
+                const longestSide = Math.max(bitmap.width, bitmap.height);
+                const scale = Math.min(2, 2400 / longestSide);
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+                canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                if (!context) {
+                    throw new Error('Fotoğraf iyileştirme başlatılamadı.');
+                }
+                context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+                const histogram = new Uint32Array(256);
+                const { data } = pixels;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = Math.round(data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                    data[i] = gray;
+                    data[i + 1] = gray;
+                    data[i + 2] = gray;
+                    histogram[gray]++;
+                }
+
+                const pixelCount = canvas.width * canvas.height;
+                const percentile = target => {
+                    let count = 0;
+                    for (let value = 0; value < histogram.length; value++) {
+                        count += histogram[value];
+                        if (count >= pixelCount * target) return value;
+                    }
+                    return 255;
+                };
+                const blackPoint = percentile(0.03);
+                const whitePoint = Math.max(blackPoint + 1, percentile(0.97));
+                const contrastRange = whitePoint - blackPoint;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const gray = Math.max(0, Math.min(255, Math.round((data[i] - blackPoint) * 255 / contrastRange)));
+                    data[i] = gray;
+                    data[i + 1] = gray;
+                    data[i + 2] = gray;
+                }
+                context.putImageData(pixels, 0, 0);
+
+                return await new Promise((resolve, reject) => {
+                    canvas.toBlob(blob => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('İyileştirilmiş fotoğraf oluşturulamadı.'));
+                    }, 'image/png');
+                });
+            } finally {
+                if (bitmap && typeof bitmap.close === 'function') {
+                    bitmap.close();
+                }
+            }
+        }
+
+        async function readPhoto(worker, photo, index, total) {
+            const enhancedImage = await createEnhancedImage(photo.image);
+            const candidates = [];
+            const failures = [];
+            for (const image of [photo.image, enhancedImage]) {
+                try {
+                    const { data } = await worker.recognize(image);
+                    if (data.text.trim()) {
+                        candidates.push({
+                            text: data.text.trim(),
+                            confidence: Number.isFinite(data.confidence) ? data.confidence : 0
+                        });
+                    }
+                } catch (error) {
+                    failures.push(error);
+                    console.warn(`OCR pass failed for ${photo.name}:`, error);
+                }
+            }
+            if (candidates.length === 0) {
+                const reason = failures.length ? ` OCR hatası: ${failures[0].message}` : '';
+                throw new Error(`${photo.name} fotoğrafından yazı okunamadı.${reason} JPG/PNG olarak, yakından, düz açıyla ve net çekip tekrar deneyin.`);
+            }
+            candidates.sort((a, b) => b.confidence - a.confidence || b.text.length - a.text.length);
+            return {
+                ...photo,
+                index,
+                total,
+                text: candidates[0].text.slice(0, 6000),
+                confidence: candidates[0].confidence
+            };
         }
 
         function showError(message) {
@@ -468,9 +737,12 @@
             details.textContent = message;
         }
 
-        async function analyzeLabel(image) {
-            if (!image) {
-                showError('Lütfen galeriden bir etiket fotoğrafı seçin.');
+        async function analyzeLabel() {
+            if (isAnalyzing) {
+                return;
+            }
+            if (pendingPhotos.length === 0) {
+                showError('Analizden önce besin tablosu veya içindekiler fotoğrafı ekleyin.');
                 return;
             }
 
@@ -487,12 +759,12 @@
             const details = document.getElementById('resultDetails');
             loading.style.display = 'block';
             resultCard.style.display = 'none';
-            document.getElementById('cameraContainer').style.display = 'none';
-
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
+            isAnalyzing = true;
+            analyzeButton.disabled = true;
+            cameraButton.disabled = true;
+            galleryButton.disabled = true;
+            renderPhotoList();
+            closeCamera();
 
             let worker;
             try {
@@ -500,24 +772,44 @@
                     throw new Error('OCR bileşeni yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.');
                 }
 
-                loading.textContent = 'Etiket OCR ile okunuyor...';
-                worker = await Tesseract.createWorker('tur');
-                const { data: { text } } = await worker.recognize(image);
-                if (!text.trim()) {
-                    throw new Error('Etiketten okunabilir bir yazı alınamadı. Fotoğrafı netleştirip tekrar deneyin.');
+                loading.textContent = 'Türkçe ve İngilizce OCR yükleniyor...';
+                worker = await Tesseract.createWorker('tur+eng');
+                const recognizedPhotos = [];
+                for (let index = 0; index < pendingPhotos.length; index++) {
+                    loading.textContent = `Fotoğraf ${index + 1}/${pendingPhotos.length} okunuyor...`;
+                    recognizedPhotos.push(await readPhoto(worker, pendingPhotos[index], index + 1, pendingPhotos.length));
                 }
+
+                const aggregatedOcrText = recognizedPhotos.map(photo =>
+                    `--- FOTOĞRAF ${photo.index} (${photoTypeNames[photo.type]}; OCR güveni %${Math.round(photo.confidence)}) ---\n${photo.text}`
+                ).join('\n\n');
+                if (aggregatedOcrText.length > 24000) {
+                    throw new Error('Okunan metin çok uzun. Fotoğraf sayısını azaltıp yalnızca tablo ve içindekiler bölümlerini ekleyin.');
+                }
+                const averageConfidence = Math.round(
+                    recognizedPhotos.reduce((total, photo) => total + photo.confidence, 0) / recognizedPhotos.length
+                );
+                const lowestConfidence = Math.round(
+                    Math.min(...recognizedPhotos.map(photo => photo.confidence))
+                );
 
                 loading.textContent = 'Besin içeriği yapay zekâ ile değerlendiriliyor...';
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        ocrText: text,
+                        ocrText: aggregatedOcrText,
+                        ocrConfidence: lowestConfidence,
                         profiles: selectedProfiles,
                         allergens: selectedAllergens
                     })
                 });
-                const result = await response.json();
+                let result;
+                try {
+                    result = await response.json();
+                } catch {
+                    throw new Error(`Analiz sunucusu JSON olmayan bir yanıt döndürdü (HTTP ${response.status}). Site adresi ve sunucu dağıtımını kontrol edin.`);
+                }
                 if (!response.ok) {
                     throw new Error(result.error || 'Analiz servisine ulaşılamadı.');
                 }
@@ -543,10 +835,14 @@
                 const summary = document.createElement('p');
                 summary.textContent = result.summary;
                 content.appendChild(summary);
+                const confidenceMessage = document.createElement('p');
+                confidenceMessage.textContent = `OCR ortalama güveni: %${averageConfidence}; en düşük fotoğraf güveni: %${lowestConfidence}. ${averageConfidence < 60 || lowestConfidence < 60 ? 'Okuma güveni düşük; lütfen OCR metnini kontrol edip daha net fotoğraf çekin.' : 'Besin değerlerini ve içerik listesini ambalajla karşılaştırın.'}`;
+                content.appendChild(confidenceMessage);
 
                 for (const [heading, items] of [
+                    ['Besin tablosundan okunan değerler', result.nutritionFacts],
                     ['Bulgular', result.findings],
-                    ['Etikette tespit edilen içerikler', result.detectedIngredients],
+                    ['İçindekiler ve alerjen bulguları', result.detectedIngredients],
                     ['Eksik / doğrulanması gereken bilgiler', result.missingInformation]
                 ]) {
                     if (items.length) {
@@ -565,9 +861,9 @@
 
                 const ocrDetails = document.createElement('details');
                 const ocrSummary = document.createElement('summary');
-                ocrSummary.textContent = 'OCR ile okunan metni göster';
+                ocrSummary.textContent = `OCR ile okunan metinleri göster (${recognizedPhotos.length} fotoğraf)`;
                 const ocrText = document.createElement('pre');
-                ocrText.textContent = text;
+                ocrText.textContent = aggregatedOcrText;
                 ocrDetails.append(ocrSummary, ocrText);
                 content.appendChild(ocrDetails);
                 details.replaceChildren(content);
@@ -580,7 +876,10 @@
                 }
                 loading.style.display = 'none';
                 loading.textContent = '🔍 Etiket taranıyor ve analiz ediliyor...';
-                fileInput.value = '';
+                isAnalyzing = false;
+                cameraButton.disabled = false;
+                galleryButton.disabled = false;
+                renderPhotoList();
             }
         }
     </script>
