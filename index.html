@@ -268,6 +268,17 @@
             margin-bottom: 4px;
         }
 
+        .result-details details {
+            margin-top: 10px;
+        }
+
+        .result-details pre {
+            max-height: 200px;
+            overflow: auto;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         .loading-spinner {
             display: none;
             text-align: center;
@@ -301,11 +312,11 @@
         <div class="action-section">
             <button class="btn-scan" onclick="openCamera()">Ürün Okut</button>
             <button class="btn-gallery" onclick="document.getElementById('fileInput').click()">Galeriden etiket seç</button>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="analyzeLabel()">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="analyzeLabel(this.files[0])">
             
             <div class="camera-container" id="cameraContainer">
                 <video id="webcam" autoplay playsinline></video>
-                <button class="btn-capture" onclick="analyzeLabel()">Etiketi Tara ve Analiz Et</button>
+                <button class="btn-capture" onclick="captureAndAnalyze()">Etiketi Tara ve Analiz Et</button>
             </div>
 
             <div class="loading-spinner" id="loadingState">
@@ -325,7 +336,7 @@
         <!-- SAĞLIK PROFİLLERİ KARTI -->
         <section class="card">
             <div class="card-title">Sağlık profillerin</div>
-            <div class="card-subtitle">Sonuç yalnızca seçtiğin profiller için üretilir. Seçim cihazında saklanır.</div>
+            <div class="card-subtitle">Sonuç yalnızca seçtiğin profiller için üretilir. Seçimler tarayıcıda kaydedilmez.</div>
             
             <div class="chips-container" id="profileGrid">
                 <label class="profile-chip"><input type="checkbox" value="diyabet"> Diyabet</label>
@@ -354,10 +365,13 @@
         </section>
 
         <footer>
-            Bilgilendirme amaçlıdır, tıbbi tavsiye yerine geçmez.
+            OCR ve yapay zekâ değerlendirmesi bilgilendirme amaçlıdır; tıbbi tavsiye yerine geçmez.
+            OCR metni ve seçilen profiller analiz için OpenAI servisine gönderilir.
+            Etiketin tamamını kontrol edin ve sağlık kararları için uzmana danışın.
         </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         // Çip tıklama davranışları
         document.querySelectorAll('.profile-chip').forEach(chip => {
@@ -396,67 +410,171 @@
             }
         }
 
-        // Ayrıntılı Analiz Simülasyonu
-        function analyzeLabel() {
+        const profileGrid = document.getElementById('profileGrid');
+        const allergenGrid = document.getElementById('allergenGrid');
+        const fileInput = document.getElementById('fileInput');
+
+        function getSelectedValues(container) {
+            return Array.from(container.querySelectorAll('input:checked')).map(input => input.value);
+        }
+
+        function captureFrame() {
+            const video = document.getElementById('webcam');
+            if (!video.videoWidth || !video.videoHeight) {
+                throw new Error('Kamera görüntüsü henüz hazır değil. Lütfen tekrar deneyin.');
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            return new Promise((resolve, reject) => {
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error('Kamera görüntüsü işlenemedi.'));
+                    }
+                }, 'image/jpeg', 0.95);
+            });
+        }
+
+        async function captureAndAnalyze() {
+            try {
+                await analyzeLabel(await captureFrame());
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
             const loading = document.getElementById('loadingState');
             const resultCard = document.getElementById('resultCard');
             const badge = document.getElementById('statusBadge');
             const details = document.getElementById('resultDetails');
+            loading.style.display = 'none';
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card border-dikkat';
+            badge.className = 'status-badge bg-dikkat';
+            badge.innerText = 'ANALİZ EDİLEMEDİ';
+            details.textContent = message;
+        }
+
+        async function analyzeLabel(image) {
+            if (!image) {
+                showError('Lütfen galeriden bir etiket fotoğrafı seçin.');
+                return;
+            }
+
+            const selectedProfiles = getSelectedValues(profileGrid);
+            const selectedAllergens = getSelectedValues(allergenGrid);
+            if (selectedProfiles.length === 0 && selectedAllergens.length === 0) {
+                showError('Analiz için en az bir sağlık profili veya alerjen seçin.');
+                return;
+            }
+
+            const loading = document.getElementById('loadingState');
+            const resultCard = document.getElementById('resultCard');
+            const badge = document.getElementById('statusBadge');
+            const details = document.getElementById('resultDetails');
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            document.getElementById('cameraContainer').style.display = 'none';
 
             if (videoStream) {
                 videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
             }
-            document.getElementById('cameraContainer').style.display = 'none';
-            loading.style.display = 'block';
 
-            setTimeout(() => {
-                loading.style.display = 'none';
+            let worker;
+            try {
+                if (!window.Tesseract) {
+                    throw new Error('OCR bileşeni yüklenemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.');
+                }
+
+                loading.textContent = 'Etiket OCR ile okunuyor...';
+                worker = await Tesseract.createWorker('tur');
+                const { data: { text } } = await worker.recognize(image);
+                if (!text.trim()) {
+                    throw new Error('Etiketten okunabilir bir yazı alınamadı. Fotoğrafı netleştirip tekrar deneyin.');
+                }
+
+                loading.textContent = 'Besin içeriği yapay zekâ ile değerlendiriliyor...';
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ocrText: text,
+                        profiles: selectedProfiles,
+                        allergens: selectedAllergens
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Analiz servisine ulaşılamadı.');
+                }
+
+                const statusClasses = {
+                    UYGUN: ['border-uygun', 'bg-uygun'],
+                    DIKKAT: ['border-dikkat', 'bg-dikkat'],
+                    ONERILMEZ: ['border-onerilmez', 'bg-onerilmez'],
+                    BELIRSIZ: ['border-dikkat', 'bg-dikkat']
+                };
+                const statusLabels = {
+                    UYGUN: 'UYGUN',
+                    DIKKAT: 'DİKKAT',
+                    ONERILMEZ: 'ÖNERİLMEZ',
+                    BELIRSIZ: 'BELİRSİZ'
+                };
+                const [borderClass, badgeClass] = statusClasses[result.status] || statusClasses.BELIRSIZ;
+                resultCard.className = `result-card ${borderClass}`;
+                badge.className = `status-badge ${badgeClass}`;
+                badge.textContent = statusLabels[result.status] || statusLabels.BELIRSIZ;
+
+                const content = document.createElement('div');
+                const summary = document.createElement('p');
+                summary.textContent = result.summary;
+                content.appendChild(summary);
+
+                for (const [heading, items] of [
+                    ['Bulgular', result.findings],
+                    ['Etikette tespit edilen içerikler', result.detectedIngredients],
+                    ['Eksik / doğrulanması gereken bilgiler', result.missingInformation]
+                ]) {
+                    if (items.length) {
+                        const title = document.createElement('strong');
+                        title.textContent = heading;
+                        content.appendChild(title);
+                        const list = document.createElement('ul');
+                        for (const item of items) {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            list.appendChild(li);
+                        }
+                        content.appendChild(list);
+                    }
+                }
+
+                const ocrDetails = document.createElement('details');
+                const ocrSummary = document.createElement('summary');
+                ocrSummary.textContent = 'OCR ile okunan metni göster';
+                const ocrText = document.createElement('pre');
+                ocrText.textContent = text;
+                ocrDetails.append(ocrSummary, ocrText);
+                content.appendChild(ocrDetails);
+                details.replaceChildren(content);
                 resultCard.style.display = 'block';
-
-                const selectedProfiles = Array.from(document.querySelectorAll('.chips-container input:checked')).map(i => i.value);
-
-                if (selectedProfiles.length === 0) {
-                    resultCard.className = "result-card border-uygun";
-                    badge.className = "status-badge bg-uygun";
-                    badge.innerText = "BİLGİ";
-                    details.innerHTML = "<p>Analiz yapabilmek için lütfen en az bir sağlık profili veya alerjen seçin.</p>";
-                    return;
+            } catch (error) {
+                showError(error.message || 'Beklenmeyen bir hata oluştu.');
+            } finally {
+                if (worker) {
+                    await worker.terminate();
                 }
-
-                if (selectedProfiles.includes('diyabet') || selectedProfiles.includes('obezite')) {
-                    resultCard.className = "result-card border-onerilmez";
-                    badge.className = "status-badge bg-onerilmez";
-                    badge.innerText = "ÖNERİLMEZ";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Uyarısı:</strong>
-                        <ul>
-                            <li><b>Serbest Şeker:</b> 100g'da 24.5g (Önerilen üst sınır: 15g). Normalden <b>%63 daha yüksek</b>. Diyabet ve obezite profiline risk oluşturur.</li>
-                            <li><b>Katkı Maddesi:</b> Glikoz-fruktoz şurubu ve E102 (Tartrazin) tespit edildi. Kan şekerini hızla yükseltir.</li>
-                        </ul>
-                    `;
-                } else if (selectedProfiles.includes('tansiyon') || selectedProfiles.includes('kalp')) {
-                    resultCard.className = "result-card border-dikkat";
-                    badge.className = "status-badge bg-dikkat";
-                    badge.innerText = "DİKKAT";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Uyarısı:</strong>
-                        <ul>
-                            <li><b>Sodyum / Tuz:</b> 100g'da 1.4g tuz (Önerilen günlük güvenli sınır: 1.0g). Sınır değerden <b>%40 daha yüksek</b>.</li>
-                            <li>Yüksek tansiyon ve kalp-damar sağlığı üzerinde olumsuz etki yaratabilir.</li>
-                        </ul>
-                    `;
-                } else {
-                    resultCard.className = "result-card border-uygun";
-                    badge.className = "status-badge bg-uygun";
-                    badge.innerText = "UYGUN";
-                    details.innerHTML = `
-                        <strong>Gerekçeli Sağlık Değerlendirmesi:</strong>
-                        <ul>
-                            <li>Seçtiğiniz aktif profiller için WHO ve Gıda Kodeksi referans sınırlarını aşan kritik bir bileşen tespit edilmemiştir.</li>
-                        </ul>
-                    `;
-                }
-            }, 1200);
+                loading.style.display = 'none';
+                loading.textContent = '🔍 Etiket taranıyor ve analiz ediliyor...';
+                fileInput.value = '';
+            }
         }
     </script>
 </body>

@@ -1,0 +1,12 @@
+{
+  "name": "besinradari",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OCR ve yapay zekâ destekli paketli gıda etiketi bilgilendirme uygulaması",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
