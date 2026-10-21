@@ -8,18 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #1b6b44;
-            --primary-gradient: linear-gradient(135deg, #48b871, #1d6a45);
+            --primary-color: #1e5aa8;
+            --primary-gradient: linear-gradient(135deg, #4a90e2, #1e5aa8);
             
-            /* Seçilmemiş durum için koyu yeşil ton */
-            --chip-unselected-bg: #1b6b44;
-            --chip-unselected-border: #1b6b44;
+            /* Seçilmemiş durum için koyu mavi ton */
+            --chip-unselected-bg: var(--primary-color);
+            --chip-unselected-border: var(--primary-color);
             
             /* Seçili durum için turuncu ton */
             --chip-selected-bg: #f39c12;
             --chip-selected-border: #e67e22;
 
-            --bg-color: #edf5f0;
+            --bg-color: #eef4fb;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
@@ -95,7 +95,7 @@
         }
 
         .btn-scan {
-            background: linear-gradient(135deg, #53bd79, #1a6541);
+            background: var(--primary-gradient);
             color: white;
             border: none;
             width: 80%;
@@ -104,7 +104,7 @@
             font-weight: 700;
             border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(27, 107, 68, 0.25);
+            box-shadow: 0 4px 12px rgba(30, 90, 168, 0.25);
             transition: transform 0.1s ease;
         }
 
@@ -115,7 +115,7 @@
         .btn-gallery {
             background: transparent;
             border: none;
-            color: #1b6b44;
+            color: var(--primary-color);
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
@@ -134,7 +134,7 @@
         .card-title {
             font-size: 0.98rem;
             font-weight: 700;
-            color: #1b6b44;
+            color: var(--primary-color);
             margin-bottom: 2px;
         }
 
@@ -180,7 +180,7 @@
             display: none;
         }
 
-        /* Seçilmemiş Durum: Koyu Yeşil */
+        /* Seçilmemiş Durum: Koyu Mavi */
         .profile-chip.unselected {
             background-color: var(--chip-unselected-bg);
             color: white;
