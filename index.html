@@ -427,7 +427,7 @@
             OCR ve yapay zekâ değerlendirmesi bilgilendirme amaçlıdır; tıbbi tavsiye yerine geçmez.
             OCR metni ve seçilen profiller analiz için Groq servisine gönderilir.
             Etiketin tamamını kontrol edin ve sağlık kararları için uzmana danışın.
-            <small class="update-date">Son güncelleme: 21.10.2026 11:54 (TSİ)</small>
+            <small class="update-date">Son güncelleme: 21.10.2026 11:58 (TSİ)</small>
         </footer>
     </main>
 
@@ -888,7 +888,12 @@
                 summary.textContent = result.summary;
                 content.appendChild(summary);
                 const confidenceMessage = document.createElement('p');
-                confidenceMessage.textContent = `OCR ortalama güveni: %${averageConfidence}; en düşük fotoğraf güveni: %${lowestConfidence}. Görseller de yapay zekâ ile incelendi. Yine de okunan değerleri ambalajla karşılaştırın.`;
+                const verificationLabels = {
+                    CONFIRMED: 'Fotoğraftan doğrulandı',
+                    PARTIAL: 'Kısmen okunabildi',
+                    UNREADABLE: 'Görüntü okunamadı'
+                };
+                confidenceMessage.textContent = `Görsel kontrol: ${verificationLabels[result.visualVerification] || 'Belirsiz'}. OCR ortalama güveni: %${averageConfidence}; en düşük fotoğraf güveni: %${lowestConfidence}. Yine de okunan değerleri ambalajla karşılaştırın.`;
                 content.appendChild(confidenceMessage);
 
                 for (const [heading, items] of [

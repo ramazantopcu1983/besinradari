@@ -100,8 +100,10 @@ function validateVisionImages(images) {
 
 function validateModelResult(result) {
     const statuses = ['UYGUN', 'DIKKAT', 'ONERILMEZ', 'BELIRSIZ'];
+    const visualVerifications = ['CONFIRMED', 'PARTIAL', 'UNREADABLE'];
     const arrayFields = ['nutritionFacts', 'findings', 'detectedIngredients', 'missingInformation'];
     if (!result || !statuses.includes(result.status)
+        || !visualVerifications.includes(result.visualVerification)
         || typeof result.summary !== 'string'
         || result.summary.length > 700
         || !arrayFields.every(field =>
@@ -146,10 +148,11 @@ async function analyze(request, response) {
         'Yalnızca fotoğrafta veya OCR metninde açıkça doğrulanabilen bilgiye dayan. Görselde olmayan/okunmayan besin değerlerini tahmin etme; WHO, mevzuat ya da kişiye özel tıbbi eşik uydurma.',
         'Seçilen alerjen etiketin bileşenlerinde açıkça bulunuyorsa ONERILMEZ olarak işaretle. "İçerebilir/aynı hatta üretilmiştir" gibi çapraz bulaşma uyarısı varsa en az DIKKAT ver ve bunu açıkça belirt.',
         'Alerjen metinde bulunmadı diye ürünün alerjen içermediği sonucuna varma; eksik bileşen/iz uyarısı bilgisi varsa BELIRSIZ ol.',
-        'OCR güveni yüzde 60 altındaysa OCR metnine tek başına güvenme; net fotoğraftan doğrulayabilirsen değeri kullan, fotoğraftan da doğrulayamıyorsan BELIRSIZ kullan. Porsiyon ile 100 g/ml değerlerini karıştırma. Bebek, gebelik, PKU ve hastalık profillerinde yetersiz bilgi varsa BELIRSIZ kullan.',
-        'UYGUN sonucunu ancak fotoğraf veya OCR ile seçilen profiller için gerekli etiket bilgileri açıkça doğrulanabiliyorsa ver. Uygun, tıbbi güvenlik garantisi değildir.',
+        'visualVerification alanı CONFIRMED olmalı: tüm fotoğraflar okunabilir ve seçilen profiller için gerekli tablo değerleri ile içindekiler/alerjen bilgileri görselden doğrulanabilir olmalıdır. Bir bölüm eksik, okunaksız veya OCR ile görsel arasında çözülemeyen çelişki varsa PARTIAL; görseller okunamıyorsa UNREADABLE seç.',
+        'UYGUN sonucunu ancak visualVerification CONFIRMED ise ve ilgili bilgiler eksiksiz doğrulanmışsa ver. Düşük OCR güven puanı tek başına engel değildir; açık fotoğraf kanıtı varsa değeri görselden doğrula. Uygun, tıbbi güvenlik garantisi değildir.',
+        'Porsiyon ile 100 g/ml değerlerini karıştırma. Bebek, gebelik, PKU ve hastalık profillerinde yetersiz bilgi varsa BELIRSIZ kullan.',
         'Kısa, kanıta dayalı bulgular yaz. Tıbbi tanı veya tedavi önerme.',
-        'Yanıtı yalnızca istenen JSON nesnesi olarak ver; alanlar: status (UYGUN, DIKKAT, ONERILMEZ, BELIRSIZ), summary (string), nutritionFacts (string array), findings (string array), detectedIngredients (string array), missingInformation (string array).'
+        'Yanıtı yalnızca istenen JSON nesnesi olarak ver; alanlar: status (UYGUN, DIKKAT, ONERILMEZ, BELIRSIZ), visualVerification (CONFIRMED, PARTIAL, UNREADABLE), summary (string), nutritionFacts (string array), findings (string array), detectedIngredients (string array), missingInformation (string array).'
     ].join(' ');
     const userContent = JSON.stringify({
         selectedHealthProfiles: selectedProfiles,
@@ -176,7 +179,7 @@ async function analyze(request, response) {
             signal: AbortSignal.timeout(30000),
             body: JSON.stringify({
                 model: MODEL,
-                temperature: 0.1,
+                temperature: 0,
                 response_format: { type: 'json_object' },
                 messages: [
                     { role: 'system', content: systemPrompt },
@@ -219,6 +222,12 @@ async function analyze(request, response) {
         throw new HttpError(502, 'Yapay zekâ yanıtı okunamadı. Lütfen tekrar deneyin.');
     }
     const validatedResult = validateModelResult(result);
+    if (validatedResult.status === 'UYGUN'
+        && (validatedResult.visualVerification !== 'CONFIRMED'
+            || validatedResult.missingInformation.length > 0)) {
+        validatedResult.status = 'BELIRSIZ';
+        validatedResult.summary = 'Görsel doğrulama eksik olduğu için ürünün uygunluğu güvenilir biçimde doğrulanamadı.';
+    }
     sendJson(response, 200, validatedResult);
 }
 

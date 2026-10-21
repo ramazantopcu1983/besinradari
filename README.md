@@ -24,4 +24,6 @@ OCR tarayıcıda çalışır. En fazla 3 adet küçültülmüş etiket fotoğraf
 
 OCR küçük yazı, parlama, eğri ambalaj veya hareket bulanıklığında yine hata yapabilir. İyi ışıkta parlamayı önleyin, kamerayı etikete paralel tutun, yalnızca tablo ya da içerik listesini kadraja doldurun ve odak kilitlenene kadar bekleyin. Analiz sonucundaki OCR metnini ambalajla karşılaştırın.
 
+Görsel analiz için Groq'un `qwen/qwen3.8-27b` modeli kullanılır. API anahtarı olarak `GROQ_API_KEY`, istenirse görsel modelini değiştirmek için `GROQ_VISION_MODEL` ayarlanır; eski `GROQ_MODEL` değişkeni görsel model seçimini etkilemez. Sunucu, model görsel doğrulamayı tamamlamadan veya eksik bilgi varken `UYGUN` döndürürse sonucu `BELIRSIZ` olarak düşürür. Hiçbir AI modeli tıbbi güvenlik garantisi vermez.
+
 OCR hatalı okuyabilir, model yanlış veya eksik değerlendirme yapabilir. Belirsiz ya da okunmayan bilgilerde sonuç belirsiz gösterilir; sonuç tıbbi tavsiye, teşhis veya güvenlik garantisi değildir. Alerji ve sağlık kararlarında ürünün fiziksel ambalajını ve uzman görüşünü esas alın.
