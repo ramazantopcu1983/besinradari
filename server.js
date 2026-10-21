@@ -3,7 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 
 const PORT = Number(process.env.PORT || 3000);
-const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const ROOT = __dirname;
 const MAX_BODY_BYTES = 40000;
 const MAX_OCR_LENGTH = 25000;
@@ -100,8 +100,8 @@ function validateModelResult(result) {
 }
 
 async function analyze(request, response) {
-    if (!process.env.OPENAI_API_KEY) {
-        sendJson(response, 503, { error: 'Sunucuda OPENAI_API_KEY tanımlı değil. Sistem yöneticisi API anahtarını ayarlamalı.' });
+    if (!process.env.GROQ_API_KEY) {
+        sendJson(response, 503, { error: 'Sunucuda GROQ_API_KEY tanımlı değil. Sistem yöneticisi API anahtarını ayarlamalı.' });
         return;
     }
 
@@ -136,10 +136,10 @@ async function analyze(request, response) {
 
     let aiResponse;
     try {
-        aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             signal: AbortSignal.timeout(30000),
@@ -158,14 +158,14 @@ async function analyze(request, response) {
             sendJson(response, 504, { error: 'Yapay zekâ isteği zaman aşımına uğradı. Lütfen tekrar deneyin.' });
             return;
         }
-        console.error('OpenAI request failed:', error.message);
+        console.error('Groq request failed:', error.message);
         sendJson(response, 502, { error: 'Yapay zekâ servisine ulaşılamadı. Sunucu bağlantısını kontrol edin.' });
         return;
     }
 
     if (!aiResponse.ok) {
         const errorText = await aiResponse.text();
-        console.error(`OpenAI returned HTTP ${aiResponse.status}:`, errorText.slice(0, 1000));
+        console.error(`Groq returned HTTP ${aiResponse.status}:`, errorText.slice(0, 1000));
         sendJson(response, 502, { error: `Yapay zekâ servisi isteği reddetti (HTTP ${aiResponse.status}).` });
         return;
     }
